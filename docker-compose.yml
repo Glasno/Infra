@@ -9,6 +9,8 @@ services:
       - data:/data
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
+    environment:
+      - "VIRTUAL_HOST=portainer.glasno.space"
 
   frontend-landing:
     image: ghcr.io/glasno/glasno-fe:latest
@@ -21,7 +23,7 @@ services:
   frontend-workspace:
     image: ghcr.io/glasno/glasno-fe:latest
     ports:
-      - 3001:3001
+      - 3001:3000
     restart: unless-stopped
     environment:
       - "VIRTUAL_HOST=workspace.glasno.space"
@@ -29,7 +31,7 @@ services:
   frontend-job-market:
     image: ghcr.io/glasno/glasno-fe:latest
     ports:
-      - 3002:3002
+      - 3002:3000
     restart: unless-stopped
     environment:
       - "VIRTUAL_HOST=jobmarket.glasno.space"
@@ -37,7 +39,7 @@ services:
   frontend-forum:
     image: ghcr.io/glasno/glasno-fe:latest
     ports:
-      - 3003:3003
+      - 3003:3000
     restart: unless-stopped
     environment:
       - "VIRTUAL_HOST=forum.glasno.space"
