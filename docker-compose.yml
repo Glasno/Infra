@@ -10,11 +10,74 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
 
-  frontend:
+  frontend-landing:
     image: ghcr.io/glasno/glasno-fe:latest
     ports:
       - 3000:3000
     restart: unless-stopped
+    environment:
+      - "VIRTUAL_HOST=glasno.space"
+
+  frontend-workspace:
+    image: ghcr.io/glasno/glasno-fe:latest
+    ports:
+      - 3001:3001
+    restart: unless-stopped
+    environment:
+      - "VIRTUAL_HOST=workspace.glasno.space"
+
+  frontend-job-market:
+    image: ghcr.io/glasno/glasno-fe:latest
+    ports:
+      - 3002:3002
+    restart: unless-stopped
+    environment:
+      - "VIRTUAL_HOST=jobmarket.glasno.space"
+
+  frontend-forum:
+    image: ghcr.io/glasno/glasno-fe:latest
+    ports:
+      - 3002:3002
+    restart: unless-stopped
+    environment:
+      - "VIRTUAL_HOST=forum.glasno.space"
+
+  keycloak-db:
+    image: postgres
+    volumes:
+      - ./_data/keycloak-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:legacy
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: keycloak-db
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_SCHEMA: public
+      DB_PASSWORD: password
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      JDBC_PARAMS: "ssl=true"
+      VIRTUAL_HOST: keycloak.glasno.space
+    ports:
+      - "8080:8080"
+    depends_on:
+      - keycloak-db
+
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock
+    ports:
+      - 80:80
+      - 443:443
+    restart: unless-stopped
+
 
 volumes:
   data:
