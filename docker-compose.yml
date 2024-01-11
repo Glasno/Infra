@@ -37,7 +37,7 @@ services:
   frontend-forum:
     image: ghcr.io/glasno/glasno-fe:latest
     ports:
-      - 3002:3002
+      - 3003:3003
     restart: unless-stopped
     environment:
       - "VIRTUAL_HOST=forum.glasno.space"
