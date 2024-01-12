@@ -10,7 +10,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
     environment:
-      - "VIRTUAL_HOST=portainer.glasno.space"
+      VIRTUAL_HOST: portainer.glasno.space
+      CERT_NAME: portainer.glasno.space
+      HTTPS_METHOD: noredirect
 
   frontend-landing:
     image: ghcr.io/glasno/glasno-fe:latest
@@ -18,7 +20,9 @@ services:
       - 3000:3000
     restart: unless-stopped
     environment:
-      - "VIRTUAL_HOST=glasno.space"
+      VIRTUAL_HOST: glasno.space
+      CERT_NAME: glasno.space
+      HTTPS_METHOD: noredirect
 
   frontend-workspace:
     image: ghcr.io/glasno/glasno-fe:latest
@@ -26,7 +30,9 @@ services:
       - 3001:3000
     restart: unless-stopped
     environment:
-      - "VIRTUAL_HOST=workspace.glasno.space"
+      VIRTUAL_HOSTL: workspace.glasno.space
+      CERT_NAME: workspace.glasno.space
+      HTTPS_METHOD: noredirect
 
   frontend-job-market:
     image: ghcr.io/glasno/glasno-fe:latest
@@ -34,7 +40,10 @@ services:
       - 3002:3000
     restart: unless-stopped
     environment:
-      - "VIRTUAL_HOST=jobmarket.glasno.space"
+      VIRTUAL_HOST: jobmarket.glasno.space
+      CERT_NAME: jobmarket.glasno.space
+      HTTPS_METHOD: noredirect
+
 
   frontend-forum:
     image: ghcr.io/glasno/glasno-fe:latest
@@ -42,7 +51,9 @@ services:
       - 3003:3000
     restart: unless-stopped
     environment:
-      - "VIRTUAL_HOST=forum.glasno.space"
+      VIRTUAL_HOST: forum.glasno.space"
+      CERT_NAME: forum.glasno.space
+      HTTPS_METHOD: noredirect
 
   keycloak-db:
     image: postgres
@@ -68,6 +79,8 @@ services:
       KEYCLOAK_PASSWORD: admin
       JDBC_PARAMS: "ssl=true"
       VIRTUAL_HOST: keycloak.glasno.space
+      CERT_NAME: keycloak.glasno.space
+      HTTPS_METHOD: noredirect
     ports:
       - "8080:8080"
     depends_on:
