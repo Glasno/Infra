@@ -1,18 +1,18 @@
 version: "3"
 services:
-
   portainer:
     image: portainer/portainer-ce:latest
     ports:
       - 9443:9443
     volumes:
-      - data:/data
+      - ./_data:/data
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
     environment:
       VIRTUAL_HOST: portainer.glasno.space
       CERT_NAME: portainer.glasno.space
       HTTPS_METHOD: noredirect
+      VIRTUAL_PROTO: https
 
   frontend-landing:
     image: ghcr.io/glasno/glasno-fe:latest
@@ -23,6 +23,7 @@ services:
       VIRTUAL_HOST: glasno.space
       CERT_NAME: glasno.space
       HTTPS_METHOD: noredirect
+      VIRTUAL_PROTO: https
 
   frontend-workspace:
     image: ghcr.io/glasno/glasno-fe:latest
@@ -33,6 +34,7 @@ services:
       VIRTUAL_HOSTL: workspace.glasno.space
       CERT_NAME: workspace.glasno.space
       HTTPS_METHOD: noredirect
+      VIRTUAL_PROTO: https
 
   frontend-job-market:
     image: ghcr.io/glasno/glasno-fe:latest
@@ -43,7 +45,7 @@ services:
       VIRTUAL_HOST: jobmarket.glasno.space
       CERT_NAME: jobmarket.glasno.space
       HTTPS_METHOD: noredirect
-
+      VIRTUAL_PROTO: https
 
   frontend-forum:
     image: ghcr.io/glasno/glasno-fe:latest
@@ -54,35 +56,41 @@ services:
       VIRTUAL_HOST: forum.glasno.space"
       CERT_NAME: forum.glasno.space
       HTTPS_METHOD: noredirect
+      VIRTUAL_PROTO: https
 
   keycloak-db:
-    image: postgres
+    container_name: postgres-keycloak
+    image: postgres:latest
     volumes:
-      - ./_data/keycloak-data:/var/lib/postgresql/data
+      - ./postgres/data:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: keycloak
-      POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: password
-    ports:
-      - 5432:5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
 
   keycloak:
-    image: quay.io/keycloak/keycloak:legacy
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:latest
     environment:
-      DB_VENDOR: POSTGRES
-      DB_ADDR: keycloak-db
-      DB_DATABASE: keycloak
-      DB_USER: keycloak
-      DB_SCHEMA: public
-      DB_PASSWORD: password
-      KEYCLOAK_USER: admin
-      KEYCLOAK_PASSWORD: admin
-      JDBC_PARAMS: "ssl=true"
-      VIRTUAL_HOST: keycloak.glasno.space
-      CERT_NAME: keycloak.glasno.space
+      KC_HEALTH_ENABLED: true
+      KC_METRICS_ENABLED: true
+      KC_FEATURES: "declarative-user-profile,token-exchange"
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db/keycloak
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
+      KC_DB_SCHEMA: public
+      KC_HOSTNAME_PATH: /auth
+      KC_HTTP_RELATIVE_PATH: /auth
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      VIRTUAL_HOST: forum.glasno.space"
+      CERT_NAME: forum.glasno.space
       HTTPS_METHOD: noredirect
+      VIRTUAL_PROTO: https
+    entrypoint: ["/opt/keycloak/bin/kc.sh", "start-dev"]
     ports:
-      - "8080:8080"
+      - 8080:8080
     depends_on:
       - keycloak-db
 
@@ -95,7 +103,3 @@ services:
       - 80:80
       - 443:443
     restart: unless-stopped
-
-
-volumes:
-  data:
