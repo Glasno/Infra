@@ -1,4 +1,4 @@
-version: "3"
+version: '3'
 services:
   portainer:
     image: portainer/portainer-ce:latest
@@ -17,119 +17,11 @@ services:
   frontend-landing:
     image: ghcr.io/glasno/glasno-fe:latest
     ports:
-      - 3000:3000
+      - 80:3000
+      - 443:3000
     restart: unless-stopped
     environment:
       VIRTUAL_HOST: glasno.space
       CERT_NAME: glasno.space
       HTTPS_METHOD: noredirect
       VIRTUAL_PROTO: https
-
-  frontend-workspace:
-    image: ghcr.io/glasno/glasno-fe:latest
-    ports:
-      - 3001:3000
-    restart: unless-stopped
-    environment:
-      VIRTUAL_HOSTL: workspace.glasno.space
-      CERT_NAME: workspace.glasno.space
-      HTTPS_METHOD: noredirect
-      VIRTUAL_PROTO: https
-
-  frontend-job-market:
-    image: ghcr.io/glasno/glasno-fe:latest
-    ports:
-      - 3002:3000
-    restart: unless-stopped
-    environment:
-      VIRTUAL_HOST: jobmarket.glasno.space
-      CERT_NAME: jobmarket.glasno.space
-      HTTPS_METHOD: noredirect
-      VIRTUAL_PROTO: https
-
-  frontend-forum:
-    image: ghcr.io/glasno/glasno-fe:latest
-    ports:
-      - 3003:3000
-    restart: unless-stopped
-    environment:
-      VIRTUAL_HOST: forum.glasno.space
-      CERT_NAME: forum.glasno.space
-      HTTPS_METHOD: noredirect
-      VIRTUAL_PROTO: https
-
-  keycloak-db:
-    container_name: postgres-keycloak
-    image: postgres:latest
-    volumes:
-      - ./postgres/data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: keycloak
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-
-  mariadb:
-    image: mariadb:10.6
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-      - --skip-character-set-client-handshake
-      - --skip-innodb-read-only-compressed # Temporary fix for MariaDB 10.6
-    environment:
-      MYSQL_ROOT_PASSWORD: 123
-    volumes:
-      - ./mariadb-data:/var/lib/mysql
-
-  redis:
-    image: redis:alpine
-
-  frappe:
-    image: frappe/bench:latest
-    command: bash /workspace/init.sh
-    environment:
-      SHELL: /bin/bash
-      VIRTUAL_HOST: lms.glasno.space
-      CERT_NAME: lms.glasno.space
-      HTTPS_METHOD: noredirect
-    working_dir: /home/frappe
-    volumes:
-      - .:/workspace
-    ports:
-      - 8000:8000
-      - 9000:9000
-
-  keycloak:
-    container_name: keycloak
-    image: quay.io/keycloak/keycloak:latest
-    environment:
-      KC_HEALTH_ENABLED: true
-      KC_METRICS_ENABLED: true
-      KC_FEATURES: "declarative-user-profile,token-exchange"
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://keycloak-db/keycloak
-      KC_DB_USERNAME: postgres
-      KC_DB_PASSWORD: postgres
-      KC_DB_SCHEMA: public
-      KC_HOSTNAME_PATH: /auth
-      KC_HTTP_RELATIVE_PATH: /auth
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
-      VIRTUAL_HOST: keycloak.glasno.space
-      CERT_NAME: keycloak.glasno.space
-      HTTPS_METHOD: noredirect
-      VIRTUAL_PROTO: https
-    entrypoint: ["/opt/keycloak/bin/kc.sh", "start-dev"]
-    ports:
-      - 8080:8080
-    depends_on:
-      - keycloak-db
-
-  nginx-proxy:
-    image: jwilder/nginx-proxy
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock
-      - /nginx/certs:/etc/nginx/certs
-    ports:
-      - 80:80
-      - 443:443
-    restart: unless-stopped
